@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Algorithm
+135381.00302021697,35.38100302021697,8.041152185776102,21.62008667412675,0.1886698571882235,0.016664843971860348,-28.314794776300182,0.2839911872681712,48,hdfcbank_ns,arima

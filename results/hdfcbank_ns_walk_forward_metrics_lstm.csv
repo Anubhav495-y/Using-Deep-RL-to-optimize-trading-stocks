@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Algorithm
+100044.08304943051,0.044083049430511896,0.011253399711508294,19.2492868517659,-0.21497019452623164,-0.018403837506674927,-30.87758123128035,0.00036445211259320096,79,hdfcbank_ns,lstm

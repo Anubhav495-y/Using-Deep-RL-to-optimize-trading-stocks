@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Algorithm
+130376.27759935084,30.376277599350843,7.007052766764588,23.256381039333306,0.1497135997040427,0.014286000435050409,-24.45556541109617,0.28652180593564575,18,reliance_ns,arima

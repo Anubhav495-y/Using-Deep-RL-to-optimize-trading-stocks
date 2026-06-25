@@ -62,6 +62,7 @@ To deeply understand each phase of the project, refer to the corresponding docum
 5. **[Agent Training & Hyperparameters](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Training.md)**: PPO actor-critic details, custom callbacks, and resolving neural network overflow using dimensionless scaling.
 6. **[Evaluation & Backtesting](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Evaluation.md)**: Deterministic evaluation rollout, trade log plotting, and underwater drawdown tracking.
 7. **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Rolling out-of-sample time-series cross-validation design, performance results, and empirical research insights.
+8. **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: Rolling walk-forward validation design, mathematical formulations, and out-of-sample results of ARIMA and LSTM baselines.
 
 ---
 
@@ -118,6 +119,7 @@ python src/evaluation/walk_forward.py --stock reliance_ns --timesteps 50000
 * **HDFC Bank Sortino Stabilization**: Incorporating the downside-deviation Sortino reward (`diff_sortino`) under DQN yielded **+37.69% cumulative return** (0.2090 Sharpe), outperforming standard PPO's +14.71% and proving downside risk penalties prevent whipsawing and transaction fee drag.
 * **Infosys Policy Rescue**: Tuned DQN under `portfolio_return` generated a positive **+31.62% cumulative return** (0.1519 Sharpe) on INFY, successfully stabilizing and rescuing the agent from PPO's catastrophic high-frequency trading collapse (-41.53% return).
 * **Reliance Default Champion**: The default/untuned DQN model remains the champion configuration for Reliance, yielding **+47.12% return** and cutting drawdown to **-16.64%** (Sharpe: 0.31). 
+* **ARIMA & LSTM Forecasting Baselines**: Out-of-sample (2021–2024), ARIMA(1,0,1) generated positive returns (+28% to +35%) but suffered from high drawdowns. LSTM regressors collapsed under noise (yielding near 0% return and high trade counts), demonstrating that learning a direct policy under transaction costs is far superior to standard forecasting.
 * **Friction Penalty**: High-frequency trading without a robust strategy (e.g., `Random`) loses up to 80% of capital due to the compounding impact of 0.1% transaction fees and 0.05% price slippage.
 * **RL Agent Convergence**: In daily trading environments, agents naturally converge toward a low-frequency policy to avoid paying trading costs, demonstrating that incorporating transaction costs is vital to prevent over-trading.
 

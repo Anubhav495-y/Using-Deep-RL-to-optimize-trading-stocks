@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Algorithm
+103529.60937350625,3.5296093735062457,0.8895708195238328,15.673509123821525,-0.24786525948660895,-0.021528933586404127,-27.928285991981532,0.03185196613137078,63,infy_ns,lstm

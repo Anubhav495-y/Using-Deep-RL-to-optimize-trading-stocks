@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Algorithm
+128801.33262957375,28.80133262957375,6.675520812538727,23.240353761530297,0.1368811923291321,0.011969131714201447,-36.79617665614869,0.1814188706321269,56,infy_ns,arima

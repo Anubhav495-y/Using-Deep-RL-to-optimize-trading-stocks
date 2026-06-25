@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Algorithm
+131389.65919002812,31.38965919002812,7.218799722274372,20.669106474475058,0.15064855287792697,0.013913701474646746,-25.304452903804037,0.2852778421931092,28,tcs_ns,arima
