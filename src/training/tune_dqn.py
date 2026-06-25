@@ -11,8 +11,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from src.environment.trading_env import TradingEnv
 from src.evaluation.backtester import Backtester
+from src.utils.device_utils import select_device
 
-def objective(trial):
+def objective(trial, device="auto"):
     # 1. Load Data
     stock = "reliance_ns"
     processed_path = f"data/processed/{stock}_processed.parquet"
@@ -58,6 +59,14 @@ def objective(trial):
     target_update_interval = trial.suggest_categorical("target_update_interval", [100, 500, 1000, 5000])
     
     # 4. Train DQN Agent
+    run_device = select_device(
+        algo="dqn",
+        policy="MlpPolicy",
+        batch_size=batch_size,
+        history_len=1,
+        force_device=device
+    )
+    
     model = DQN(
         policy="MlpPolicy",
         env=train_env,
@@ -69,7 +78,8 @@ def objective(trial):
         exploration_fraction=exploration_fraction,
         exploration_final_eps=exploration_final_eps,
         target_update_interval=target_update_interval,
-        verbose=0
+        verbose=0,
+        device=run_device
     )
     
     model.learn(total_timesteps=50000)
@@ -98,12 +108,14 @@ def run_tuning():
     parser.add_argument("--trials", type=int, default=30, help="Number of trials.")
     parser.add_argument("--study-name", type=str, default="dqn_study", help="Optuna study name.")
     parser.add_argument("--storage", type=str, default=None, help="Optuna storage URL (e.g. sqlite:///optuna.db).")
+    parser.add_argument("--device", type=str, default="auto", help="Device: 'cpu', 'cuda', 'auto'.")
     args = parser.parse_args()
     
     print("\n=================== Starting DQN Hyperparameter Tuning ===================")
     print(f"Number of Trials: {args.trials}")
     print(f"Study Name: {args.study_name}")
     print(f"Storage: {args.storage}")
+    print(f"Device: {args.device}")
     
     # Set up optuna logging
     optuna.logging.set_verbosity(optuna.logging.INFO)
@@ -114,7 +126,7 @@ def run_tuning():
         load_if_exists=True,
         direction="maximize"
     )
-    study.optimize(objective, n_trials=args.trials)
+    study.optimize(lambda t: objective(t, device=args.device), n_trials=args.trials)
     
     print("\n=================== Hyperparameter Tuning Results ===================")
     try:

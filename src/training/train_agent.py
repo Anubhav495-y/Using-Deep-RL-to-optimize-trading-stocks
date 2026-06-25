@@ -10,6 +10,7 @@ from stable_baselines3.common.callbacks import BaseCallback
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 
 from src.environment.trading_env import TradingEnv
+from src.utils.device_utils import select_device
 
 class TradingMetricsCallback(BaseCallback):
     """
@@ -50,6 +51,7 @@ def train():
     parser.add_argument("--reward", type=str, default="portfolio_return", help="Reward function type: 'portfolio_return', 'log_return', 'risk_adjusted'.")
     parser.add_argument("--feature-group", type=str, default="state_full", help="Feature group to use: 'state_0', 'state_1', 'state_full'.")
     parser.add_argument("--config", type=str, default="configs/ppo_config.yaml", help="Path to PPO hyperparameters config file.")
+    parser.add_argument("--device", type=str, default="auto", help="Device: 'cpu', 'cuda', 'auto'.")
     
     args = parser.parse_args()
     
@@ -92,6 +94,16 @@ def train():
     tb_name = f"ppo_{args.stock}_{args.reward}_{args.feature_group}"
 
     
+    # Determine device suitability dynamically
+    run_device = select_device(
+        algo="ppo",
+        policy="MlpPolicy",
+        batch_size=config.get('batch_size'),
+        history_len=1,
+        net_arch=config.get('policy_kwargs', {}).get('net_arch'),
+        force_device=args.device
+    )
+
     # Instantiate PPO Agent
     model = PPO(
         policy="MlpPolicy",
@@ -108,7 +120,8 @@ def train():
         max_grad_norm=config['max_grad_norm'],
         policy_kwargs=config['policy_kwargs'],
         verbose=1,
-        tensorboard_log=tensorboard_log
+        tensorboard_log=tensorboard_log,
+        device=run_device
     )
     
     # Callbacks

@@ -12,6 +12,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 from src.environment.trading_env import TradingEnv
 from src.evaluation.backtester import Backtester
 from src.baselines.baseline_strategies import calculate_metrics
+from src.utils.device_utils import select_device
 
 def run_walk_forward_validation():
     parser = argparse.ArgumentParser(description="Run walk-forward validation for a stock ticker.")
@@ -23,6 +24,7 @@ def run_walk_forward_validation():
     parser.add_argument("--history-len", type=int, default=1, help="Temporal frame stacking/history window length.")
     parser.add_argument("--algo", type=str, default="ppo", choices=["ppo", "a2c", "dqn"], help="RL algorithm: 'ppo', 'a2c', 'dqn'.")
     parser.add_argument("--config", type=str, default=None, help="Path to hyperparameters config file.")
+    parser.add_argument("--device", type=str, default="auto", help="Device: 'cpu', 'cuda', 'auto'.")
     
     args = parser.parse_args()
     
@@ -84,7 +86,26 @@ def run_walk_forward_validation():
                 if loaded_config and args.algo in loaded_config:
                     config_params = loaded_config[args.algo]
 
-        print(f"Training {args.algo.upper()} agent for {args.timesteps} steps...")
+        # Determine batch_size for device suitability checking
+        batch_size = config_params.get("batch_size")
+        if batch_size is None:
+            if args.algo == "ppo":
+                batch_size = 64
+            elif args.algo == "dqn":
+                batch_size = 32
+            else:
+                batch_size = None
+
+        run_device = select_device(
+            algo=args.algo,
+            policy="MlpPolicy",
+            batch_size=batch_size,
+            history_len=args.history_len,
+            net_arch=config_params.get("policy_kwargs", {}).get("net_arch"),
+            force_device=args.device
+        )
+
+        print(f"Training {args.algo.upper()} agent on device: {run_device} for {args.timesteps} steps...")
         if args.algo == "ppo":
             ppo_kwargs = {
                 "policy": "MlpPolicy",
@@ -94,7 +115,8 @@ def run_walk_forward_validation():
                 "batch_size": 64,
                 "n_epochs": 10,
                 "gamma": 0.99,
-                "verbose": 0
+                "verbose": 0,
+                "device": run_device
             }
             ppo_kwargs.update(config_params)
             model = PPO(**ppo_kwargs)
@@ -105,7 +127,8 @@ def run_walk_forward_validation():
                 "learning_rate": 0.0007,
                 "n_steps": 5,
                 "gamma": 0.99,
-                "verbose": 0
+                "verbose": 0,
+                "device": run_device
             }
             a2c_kwargs.update(config_params)
             model = A2C(**a2c_kwargs)
@@ -118,7 +141,8 @@ def run_walk_forward_validation():
                 "learning_starts": 100,
                 "batch_size": 32,
                 "gamma": 0.99,
-                "verbose": 0
+                "verbose": 0,
+                "device": run_device
             }
             dqn_kwargs.update(config_params)
             model = DQN(**dqn_kwargs)
