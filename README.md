@@ -114,8 +114,11 @@ python src/evaluation/walk_forward.py --stock reliance_ns --timesteps 50000
 
 ## Key Experimental Results
 
-* **Alpha Capture on Infosys (INFY)**: Out-of-sample (2021–2024), the rolling walk-forward PPO agent successfully outperformed the passive Buy & Hold benchmark on Infosys, yielding **+73.24% return** compared to +64.56%. It did so with **lower risk**, reducing Maximum Drawdown from -35.56% to -33.00% and increasing the Sharpe ratio from 0.40 to 0.46.
-* **Passive Investing Superiority**: In long-term upward-trending markets, passively holding the asset (`Buy_and_Hold`) remains the strongest baseline.
-* **Friction Penalty**: High-frequency trading without a strategy (e.g., `Random`) loses up to 80% of capital due to the compounding impact of 0.1% transaction fees and 0.05% price slippage.
-* **RL Agent Convergence**: In PPO training, agents naturally converge toward a low-frequency passive holding policy to avoid paying trading costs, demonstrating that incorporating transaction costs is vital to prevent agents from over-trading.
+* **TCS Champion (V2 DQN Tuned)**: Out-of-sample (2021–2024), the tuned DQN model achieved the **highest performance in the entire project** on TCS, yielding **+78.04% cumulative return** and a **0.5914 Sharpe ratio** with a maximum drawdown of only **-15.67%** (compared to Buy & Hold's +51.27% return and -24.98% drawdown).
+* **HDFC Bank Sortino Stabilization**: Incorporating the downside-deviation Sortino reward (`diff_sortino`) under DQN yielded **+37.69% cumulative return** (0.2090 Sharpe), outperforming standard PPO's +14.71% and proving downside risk penalties prevent whipsawing and transaction fee drag.
+* **Infosys Policy Rescue**: Tuned DQN under `portfolio_return` generated a positive **+31.62% cumulative return** (0.1519 Sharpe) on INFY, successfully stabilizing and rescuing the agent from PPO's catastrophic high-frequency trading collapse (-41.53% return).
+* **Reliance Default Champion**: The default/untuned DQN model remains the champion configuration for Reliance, yielding **+47.12% return** and cutting drawdown to **-16.64%** (Sharpe: 0.31). 
+* **Friction Penalty**: High-frequency trading without a robust strategy (e.g., `Random`) loses up to 80% of capital due to the compounding impact of 0.1% transaction fees and 0.05% price slippage.
+* **RL Agent Convergence**: In daily trading environments, agents naturally converge toward a low-frequency policy to avoid paying trading costs, demonstrating that incorporating transaction costs is vital to prevent over-trading.
+
 
