@@ -4,7 +4,7 @@ import argparse
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from stable_baselines3 import PPO, A2C, DQN
+from stable_baselines3 import PPO, A2C, DQN, SAC, TD3
 
 # Add src to Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
@@ -20,9 +20,9 @@ def run_walk_forward_validation():
     parser.add_argument("--timesteps", type=int, default=50000, help="Training timesteps per window.")
     parser.add_argument("--feature-group", type=str, default="state_full", help="Feature group: 'state_0', 'state_1', 'state_full'.")
     parser.add_argument("--reward-type", type=str, default="portfolio_return", help="Reward function type.")
-    parser.add_argument("--action-space-type", type=str, default="discrete_3", help="Action space: 'discrete_3', 'discrete_7'.")
+    parser.add_argument("--action-space-type", type=str, default="discrete_3", help="Action space: 'discrete_3', 'discrete_7', 'continuous'.")
     parser.add_argument("--history-len", type=int, default=1, help="Temporal frame stacking/history window length.")
-    parser.add_argument("--algo", type=str, default="ppo", choices=["ppo", "a2c", "dqn"], help="RL algorithm: 'ppo', 'a2c', 'dqn'.")
+    parser.add_argument("--algo", type=str, default="ppo", choices=["ppo", "a2c", "dqn", "sac", "td3"], help="RL algorithm: 'ppo', 'a2c', 'dqn', 'sac', 'td3'.")
     parser.add_argument("--config", type=str, default=None, help="Path to hyperparameters config file.")
     parser.add_argument("--device", type=str, default="auto", help="Device: 'cpu', 'cuda', 'auto'.")
     
@@ -146,6 +146,40 @@ def run_walk_forward_validation():
             }
             dqn_kwargs.update(config_params)
             model = DQN(**dqn_kwargs)
+        elif args.algo == "sac":
+            sac_kwargs = {
+                "policy": "MlpPolicy",
+                "env": train_env,
+                "learning_rate": 0.0003,
+                "buffer_size": 50000,
+                "learning_starts": 100,
+                "batch_size": 64,
+                "tau": 0.005,
+                "gamma": 0.99,
+                "verbose": 0,
+                "device": run_device
+            }
+            sac_kwargs.update(config_params)
+            model = SAC(**sac_kwargs)
+        elif args.algo == "td3":
+            from stable_baselines3.common.noise import NormalActionNoise
+            n_actions = train_env.action_space.shape[-1]
+            action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
+            td3_kwargs = {
+                "policy": "MlpPolicy",
+                "env": train_env,
+                "learning_rate": 0.001,
+                "buffer_size": 50000,
+                "learning_starts": 100,
+                "batch_size": 64,
+                "tau": 0.005,
+                "gamma": 0.99,
+                "action_noise": action_noise,
+                "verbose": 0,
+                "device": run_device
+            }
+            td3_kwargs.update(config_params)
+            model = TD3(**td3_kwargs)
         model.learn(total_timesteps=args.timesteps)
         
         # 3. Backtest on Test data (out-of-sample)

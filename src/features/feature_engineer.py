@@ -171,8 +171,22 @@ class FeatureEngineer:
             bench_perf = benchmark_df['Close'].pct_change(periods=20)
             df['Relative_Strength'] = stock_perf - df.index.map(bench_perf)
             
+            # Compute rolling covariance and correlation (20 days)
+            df['Covariance_20'] = df['Daily_Return'].rolling(window=20).cov(df['Market_Return'])
+            df['Correlation_20'] = df['Daily_Return'].rolling(window=20).corr(df['Market_Return'])
+            
+            # Compute rolling beta (20 days)
+            market_var = df['Market_Return'].rolling(window=20).var()
+            df['Beta_20'] = df['Covariance_20'] / (market_var + 1e-9)
+            
+            # Trend regime detector based on ewm trend crossover of daily returns
+            ema_10_ret = df['Daily_Return'].ewm(span=10, adjust=False).mean()
+            ema_50_ret = df['Daily_Return'].ewm(span=50, adjust=False).mean()
+            df['Trend_Regime'] = np.sign(ema_10_ret - ema_50_ret)
+            
             # Fill missing benchmark metrics
-            for col in ['Market_Return', 'Market_Volatility', 'Market_Trend', 'Relative_Strength']:
+            for col in ['Market_Return', 'Market_Volatility', 'Market_Trend', 'Relative_Strength',
+                        'Covariance_20', 'Correlation_20', 'Beta_20', 'Trend_Regime']:
                 df[col] = df[col].ffill().fillna(0.0)
 
         # Clean up any remaining NaN/Inf values

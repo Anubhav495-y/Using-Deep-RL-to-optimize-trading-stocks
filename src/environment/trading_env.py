@@ -61,7 +61,8 @@ class TradingEnv(gym.Env):
         ]
         state_6_cols = state_5_cols
         state_7_cols = state_6_cols + [
-            'Market_Return', 'Market_Volatility', 'Market_Trend', 'Relative_Strength'
+            'Market_Return', 'Market_Volatility', 'Market_Trend', 'Relative_Strength',
+            'Covariance_20', 'Correlation_20', 'Beta_20', 'Trend_Regime'
         ]
         state_8_cols = state_7_cols
 
@@ -91,11 +92,21 @@ class TradingEnv(gym.Env):
         self.feature_cols = [col for col in selected_cols if col in self.df.columns]
         self.num_features = len(self.feature_cols)
 
+        # Pre-convert DataFrame to numpy arrays for fast lookups (avoiding pandas iloc overhead in step loop)
+        self.features_array = self.df[self.feature_cols].values.astype(np.float32)
+        self.close_prices = self.df['Close'].values.astype(np.float32)
+        self.dates = self.df.index.tolist()
+        self.rolling_std_returns = self.df['Rolling_Std_Return_10'].values.astype(np.float32) if 'Rolling_Std_Return_10' in self.df.columns else None
+        self.bb_stds = self.df['BB_Std'].values.astype(np.float32) if 'BB_Std' in self.df.columns else None
+
+
         # Action Space configuration
         if self.action_space_type == "discrete_3":
             self.action_space = spaces.Discrete(3)
         elif self.action_space_type == "discrete_7":
             self.action_space = spaces.Discrete(7)
+        elif self.action_space_type == "continuous":
+            self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
         else:
             raise ValueError(f"Unknown action_space_type: {self.action_space_type}")
 
@@ -179,8 +190,7 @@ class TradingEnv(gym.Env):
         assert self.action_space.contains(action), f"Invalid action: {action}"
 
         # Current day's price data
-        current_row = self.df.iloc[self.current_step]
-        current_price = current_row['Close']
+        current_price = self.close_prices[self.current_step]
 
         # Execute trades at the current price
         # Buy: we buy at a slightly higher price due to slippage
@@ -220,6 +230,17 @@ class TradingEnv(gym.Env):
             elif action == 6:
                 trade_type = 2
                 trade_fraction = 1.00
+        elif self.action_space_type == "continuous":
+            act_val = float(action[0]) if isinstance(action, (np.ndarray, list)) else float(action)
+            if act_val > 0.1:
+                trade_type = 1
+                trade_fraction = min(act_val, 1.0)
+            elif act_val < -0.1:
+                trade_type = 2
+                trade_fraction = min(abs(act_val), 1.0)
+            else:
+                trade_type = 0
+                trade_fraction = 0.0
 
         if trade_type == 1:  # Buy
             buy_price = current_price * (1.0 + self.slippage)
@@ -271,8 +292,7 @@ class TradingEnv(gym.Env):
         self.current_step += 1
         
         # Calculate new portfolio value based on next day's close price
-        next_row = self.df.iloc[self.current_step]
-        next_price = next_row['Close']
+        next_price = self.close_prices[self.current_step]
         self.portfolio_value = self.cash + (self.holdings * next_price)
         self.peak_portfolio_value = max(self.peak_portfolio_value, self.portfolio_value)
 
@@ -293,11 +313,11 @@ class TradingEnv(gym.Env):
 
     def _get_raw_observation(self):
         # Extract features for the current step
-        features = self.df.iloc[self.current_step][self.feature_cols].values.astype(np.float32)
+        features = self.features_array[self.current_step]
 
         # Normalize portfolio state elements to prevent scale issues in Neural Networks
         norm_cash = np.array([self.cash / self.portfolio_value], dtype=np.float32)
-        current_price = self.df.iloc[self.current_step]['Close']
+        current_price = self.close_prices[self.current_step]
         norm_position = np.array([(self.holdings * current_price) / self.portfolio_value], dtype=np.float32)
         norm_return = np.array([(self.portfolio_value - self.initial_cash) / self.initial_cash], dtype=np.float32)
 
@@ -355,9 +375,9 @@ class TradingEnv(gym.Env):
         # 5. Portfolio Return minus Volatility Penalty
         elif self.reward_type == "return_minus_volatility":
             vol_penalty = 0.0
-            if 'Rolling_Std_Return_10' in self.df.columns:
-                rolling_std = self.df.iloc[self.current_step]['Rolling_Std_Return_10']
-                current_price = self.df.iloc[self.current_step]['Close']
+            if self.rolling_std_returns is not None:
+                rolling_std = self.rolling_std_returns[self.current_step]
+                current_price = self.close_prices[self.current_step]
                 position_ratio = (self.holdings * current_price) / self.portfolio_value
                 vol_penalty = rolling_std * position_ratio
             reward = daily_return - 0.5 * vol_penalty
@@ -397,9 +417,9 @@ class TradingEnv(gym.Env):
         elif self.reward_type == "hybrid":
             drawdown = (self.peak_portfolio_value - self.portfolio_value) / self.peak_portfolio_value
             vol_penalty = 0.0
-            if 'Rolling_Std_Return_10' in self.df.columns:
-                rolling_std = self.df.iloc[self.current_step]['Rolling_Std_Return_10']
-                current_price = self.df.iloc[self.current_step]['Close']
+            if self.rolling_std_returns is not None:
+                rolling_std = self.rolling_std_returns[self.current_step]
+                current_price = self.close_prices[self.current_step]
                 position_ratio = (self.holdings * current_price) / self.portfolio_value
                 vol_penalty = rolling_std * position_ratio
             reward = daily_return - norm_tx_cost - 0.1 * drawdown - 0.5 * vol_penalty
@@ -407,9 +427,9 @@ class TradingEnv(gym.Env):
         # Sharpe-inspired (deprecated / backward compatible)
         elif self.reward_type == "risk_adjusted":
             vol_penalty = 0.0
-            if 'BB_Std' in self.df.columns:
-                current_std = self.df.iloc[self.current_step]['BB_Std']
-                current_price = self.df.iloc[self.current_step]['Close']
+            if self.bb_stds is not None:
+                current_std = self.bb_stds[self.current_step]
+                current_price = self.close_prices[self.current_step]
                 norm_std = current_std / current_price
                 vol_penalty = 0.05 * norm_std * (self.holdings * current_price / self.portfolio_value)
             reward = daily_return - vol_penalty
@@ -429,10 +449,9 @@ class TradingEnv(gym.Env):
         }
 
     def _record_history(self, action, reward):
-        current_row = self.df.iloc[self.current_step]
         self.history.append({
-            "date": self.df.index[self.current_step],
-            "price": current_row['Close'],
+            "date": self.dates[self.current_step],
+            "price": self.close_prices[self.current_step],
             "cash": self.cash,
             "holdings": self.holdings,
             "portfolio_value": self.portfolio_value,

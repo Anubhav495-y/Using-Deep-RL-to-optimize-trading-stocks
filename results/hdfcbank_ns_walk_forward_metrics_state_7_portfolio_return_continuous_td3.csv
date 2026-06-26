@@ -1,0 +1,2 @@
+Final Value,Cumulative Return (%),Annualized Return (%),Annualized Volatility (%),Sharpe Ratio,Sortino Ratio,Max Drawdown (%),Calmar Ratio,Number of Trades,Stock,Feature_Group,Reward_Type,Action_Space_Type,History_Len,Algorithm
+140977.58222448983,40.97758222448983,9.164358223728918,20.242414597386173,0.2381374954213612,0.021481470180924098,-24.432980886287535,0.3750814633048811,538,hdfcbank_ns,state_7,portfolio_return,continuous,1,td3

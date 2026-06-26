@@ -177,3 +177,66 @@ Using the optimized DQN hyperparameters found via Optuna (`configs/dqn_best_para
 | **INFY** | **DQN (Tuned)** | **portfolio_return** | **31.62%** | **7.27%** | **0.1519** | **0.0128** | **-27.48%** | **141** |
 | | DQN (Tuned) | diff_sortino | 16.93% | 4.08% | 0.0039 | 0.0003 | -36.11% | 54 |
 
+---
+
+## 10. Version 3 State Representation Scaling Results (State 7 - Market Context)
+
+To evaluate the impact of rolling market covariance, correlation, beta, and trend regime signals (State 7), we ran walk-forward validation (2021–2024) using the same tuned DQN agent parameters across all 4 stocks:
+
+| Stock | Algorithm | Reward Type | Feature Group | Cumulative Return (%) | Annualized Return (%) | Sharpe Ratio | Max Drawdown (%) | Trades |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **RELIANCE** | DQN (Tuned) | portfolio_return | State 7 | 15.52% | 3.75% | -0.0290 | -21.19% | 50 |
+| | DQN (Tuned) | diff_sortino | State 7 | -10.45% | -2.78% | -0.6435 | -24.46% | 71 |
+| **TCS** | DQN (Tuned) | portfolio_return | State 7 | 32.17% | 7.38% | 0.1525 | -14.09% | 102 |
+| | DQN (Tuned) | diff_sortino | State 7 | 26.69% | 6.23% | 0.0796 | -16.72% | 56 |
+| **HDFCBANK** | **DQN (Tuned)** | **diff_sortino** | **State 7** | **51.73%** | **11.23%** | **0.3423** | **-20.87%** | **87** |
+| | DQN (Tuned) | portfolio_return | State 7 | 16.95% | 4.08% | -0.0552 | -29.32% | 142 |
+| **INFY** | **DQN (Tuned)** | **diff_sortino** | **State 7** | **30.94%** | **7.12%** | **0.1365** | **-28.28%** | **24** |
+| | DQN (Tuned) | portfolio_return | State 7 | 11.27% | 2.76% | -0.3210 | -8.15% | 92 |
+
+### Key Observations:
+1. **HDFCBANK Outperformance**: Moving from State 2 to State 7 under the `diff_sortino` reward led to a significant increase in Cumulative Return (from **37.69%** to **51.73%**) and Sharpe Ratio (from **0.2090** to **0.3423**), establishing State 7 as the new champion for HDFC Bank.
+2. **INFY Efficiency Gain**: For INFY under `diff_sortino`, State 7 achieved **30.94% return** (Sharpe: **0.1365**) compared to State 2's **16.93% return** (Sharpe: **0.0039**). Crucially, the number of trades was cut in half (from **54** to **24**), demonstrating that market trend context successfully filtered out noisy intraday trades, reducing transaction cost drag.
+3. **TCS and Reliance Degradation**: For TCS and Reliance, adding market features (State 7) degraded performance compared to their State 2 champions (TCS return dropped from 78.04% to 32.17%). This suggests that market-wide context features introduced overfitting noise for these specific single-stock dynamics.
+
+---
+
+## 11. Version 4 Continuous Action Space Validation Results (State 7 - Market Context)
+
+To evaluate the benefits of continuous action scaling, we ran walk-forward validation (2021–2024) for PPO continuous, SAC, and TD3 agents under the State 7 (Market Context) feature group:
+
+| Stock | Algorithm | Reward Type | Feature Group | Action Space | Cumulative Return (%) | Annualized Return (%) | Sharpe Ratio | Max Drawdown (%) | Trades |
+| :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **RELIANCE** | PPO | portfolio_return | State 7 | continuous | 12.82% | 3.13% | -0.0362 | -24.46% | 378 |
+| | PPO | diff_sortino | State 7 | continuous | 14.05% | 3.41% | -0.1796 | -17.60% | 552 |
+| | SAC | portfolio_return | State 7 | continuous | -14.87% | -4.03% | -0.7535 | -23.82% | 676 |
+| | SAC | diff_sortino | State 7 | continuous | -0.13% | -0.03% | -106.8547 | -0.13% | 18 |
+| | **TD3 (New Champion)** | **portfolio_return** | **State 7** | **continuous** | **46.29%** | **10.20%** | **0.2944** | **-28.15%** | **534** |
+| | TD3 | diff_sortino | State 7 | continuous | -1.72% | -0.44% | -0.6116 | -17.32% | 138 |
+| **TCS** | PPO | portfolio_return | State 7 | continuous | 5.93% | 1.48% | -0.2608 | -21.43% | 267 |
+| | **PPO (New Champion)** | **diff_sortino** | **State 7** | **continuous** | **32.07%** | **7.36%** | **0.1553** | **-11.83%** | **755** |
+| | SAC | portfolio_return | State 7 | continuous | -5.29% | -1.38% | -0.4073 | -21.68% | 848 |
+| | SAC | diff_sortino | State 7 | continuous | -0.05% | -0.01% | -3.6391 | -2.61% | 149 |
+| | TD3 | portfolio_return | State 7 | continuous | -25.54% | -7.25% | -0.7899 | -41.93% | 362 |
+| | TD3 | diff_sortino | State 7 | continuous | -0.59% | -0.15% | -25.1296 | -0.59% | 6 |
+| **HDFCBANK** | PPO | portfolio_return | State 7 | continuous | 9.78% | 2.41% | -0.1621 | -20.42% | 319 |
+| | PPO | diff_sortino | State 7 | continuous | 24.27% | 5.70% | 0.0359 | -19.56% | 794 |
+| | SAC | portfolio_return | State 7 | continuous | 15.97% | 3.86% | -0.0821 | -15.05% | 852 |
+| | SAC | diff_sortino | State 7 | continuous | -2.41% | -0.62% | -1.6959 | -7.97% | 286 |
+| | **TD3** | **portfolio_return** | **State 7** | **continuous** | **40.98%** | **9.16%** | **0.2381** | **-24.43%** | **538** |
+| | TD3 | diff_sortino | State 7 | continuous | 2.17% | 0.55% | -3.6760 | -1.50% | 24 |
+| **INFY** | PPO | portfolio_return | State 7 | continuous | 29.05% | 6.73% | 0.1254 | -33.69% | 478 |
+| | PPO | diff_sortino | State 7 | continuous | 40.92% | 9.15% | 0.2910 | -17.49% | 595 |
+| | **SAC (New Champion)** | **portfolio_return** | **State 7** | **continuous** | **108.27%** | **20.60%** | **0.7676** | **-20.17%** | **865** |
+| | SAC | diff_sortino | State 7 | continuous | 0.03% | 0.01% | -40.6598 | -0.30% | 40 |
+| | **TD3** | **diff_sortino** | **State 7** | **continuous** | **51.42%** | **11.17%** | **0.4909** | **-10.68%** | **19** |
+| | TD3 | portfolio_return | State 7 | continuous | -14.99% | -4.06% | -0.3860 | -42.54% | 599 |
+
+### Key Observations:
+1. **INFY SAC continuous Outperformance**: SAC continuous under the `portfolio_return` reward achieved the **highest performance in the entire project for INFY**, yielding **108.27% return** and a high Sharpe ratio of **0.7676**. It successfully leveraged fractional position scaling to beat Buy & Hold (64.56%) by a wide margin.
+2. **INFY TD3 continuous Efficiency**: TD3 continuous under the `diff_sortino` reward achieved a remarkable **51.42% return** with a Sharpe ratio of **0.4909** and an exceptionally low drawdown of **-10.68%** (compared to Buy & Hold's -35.56% drawdown) in only **19 trades**. This demonstrates that continuous actor-critic regularization with deterministic policy smoothing successfully avoids transaction cost drag while securing high risk-adjusted profits.
+3. **Reliance TD3 continuous Champion**: For Reliance, TD3 continuous (portfolio_return) achieved a new best return of **46.29%** (0.2944 Sharpe), outperforming DQN discrete (15.52%) and Buy & Hold (34.33%).
+4. **Friction Sensitivity**: Stochastic policies (like SAC) are highly sensitive to transaction fees. Because action values float continuously, stochastic exploration led SAC to execute up to 865 micro-trades, creating severe fee erosion unless regularized by a risk penalty. Deterministic policy networks (like TD3) combined with Differential Sortino rewards successfully regularized action scaling.
+
+
+

@@ -30,7 +30,10 @@ class Backtester:
         while not done:
             # Predict action deterministically (no exploration noise)
             action, _states = self.model.predict(obs, deterministic=True)
-            obs, reward, terminated, truncated, info = self.env.step(int(action))
+            if self.env.action_space_type == "continuous":
+                obs, reward, terminated, truncated, info = self.env.step(action)
+            else:
+                obs, reward, terminated, truncated, info = self.env.step(int(action))
             done = terminated or truncated
             
         self.history_df = self.env.get_history_df()
