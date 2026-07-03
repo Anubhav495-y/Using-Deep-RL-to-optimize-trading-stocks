@@ -48,6 +48,8 @@ A key factor in our policy performance is the transition from raw price observat
   - **Market Correlation ($Corr_{20}$)**: Asset correlation to the benchmark index.
   - **Market Trend Regime**: Systemic volatility indicators.
 
+**Hypothesis**: Replacing non-stationary absolute price inputs with scale-invariant moving average ratios will stabilize policy learning by providing stationary relative trends. Furthermore, conditioning single-stock models on market-wide beta and correlation indicators will allow the policy to identify systemic market downturns and dynamically adjust position exposure.
+
 ### Empirical Evidence of State Scaling:
 1. **HDFCBANK Volatility Mitigation**: Moving from State 2 to State 7 under the `diff_sortino` reward led to an increase in Cumulative Return (from **37.69%** to **51.73%**) and Sharpe Ratio (from **0.2090** to **0.3423**).
 2. **INFY Trading Efficiency**: For INFY under `diff_sortino`, State 7 achieved **30.94% return** (Sharpe: **0.1365**) compared to State 2's **16.93% return** (Sharpe: **0.0039**). Crucially, the number of trades was reduced by half (from **54** to **24**), demonstrating that market trend context successfully filtered out noisy trades, reducing transaction cost drag.
@@ -66,6 +68,8 @@ $$R_t = \frac{B_{t-1} \Delta A_t - \frac{1}{2} A_{t-1} \Delta B_t}{(B_{t-1} - A_
 In financial markets, volatility is not symmetrical: upside volatility is desirable, while downside volatility represents risk. We modified the Differential Sharpe to track only **downside deviation** ($B^- = \mathbb{E}[\min(0, r_t)^2]$):
 $$R_t = \frac{B^-_{t-1} \Delta A_t - \frac{1}{2} A_{t-1} \Delta B^-_t}{(B^-_{t-1})^{1.5}}$$
 
+**Hypothesis**: Bounding and penalizing downside variance ($B^-$) rather than total variance (Sharpe) will regularize model drawdowns while preventing the premature liquidation of winning momentum positions, yielding higher out-of-sample Sharpe and Sortino ratios under transaction costs.
+
 ### Empirical Evidence of Reward Formulations (Reliance Walk-Forward):
 * **Reward 1 (Portfolio Return)**: Achieved **40.21% return** (Sharpe: **0.2314**, Max Drawdown: **-22.67%**) with **3 trades**.
 * **Reward 3 (Return minus Drawdown)**: Bounded risk (reducing Max Drawdown to **-16.64%**), but triggered cash convergence (only **1 trade**), where the agent preferred to sit in risk-free cash.
@@ -77,6 +81,8 @@ $$R_t = \frac{B^-_{t-1} \Delta A_t - \frac{1}{2} A_{t-1} \Delta B^-_t}{(B^-_{t-1
 ## 5. RL Agents: Discrete vs. Continuous Architectures
 
 We evaluated value-based and policy-based methods across discrete and continuous action spaces:
+
+**Hypothesis**: Restricting action space granularity to discrete boundaries (`discrete_3`) will function as a strong regularizer that minimizes trade execution frequency. Continuous action spaces will capture finer-scale position sizing, but stochastic exploration methods (SAC) will experience high trade frequency and fee erosion unless regularized by deterministic policy smoothing (TD3) and risk-aware rewards.
 
 ### 1. Discrete DQN
 * **Action Space**: `discrete_3` (Hold, 100% Buy, 100% Sell).
