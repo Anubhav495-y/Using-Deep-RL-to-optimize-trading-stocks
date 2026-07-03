@@ -63,6 +63,7 @@ To deeply understand each phase of the project, refer to the corresponding docum
 6. **[Evaluation & Backtesting](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Evaluation.md)**: Deterministic evaluation rollout, trade log plotting, and underwater drawdown tracking.
 7. **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Rolling out-of-sample time-series cross-validation design, performance results, and empirical research insights.
 8. **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: Rolling walk-forward validation design, mathematical formulations, and out-of-sample results of ARIMA and LSTM baselines.
+9. **[Quant-RL Equities Trading Report](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Competition_Winning_Report.md)**: Detailed report detailing progressive state formulations, downside risk engineering, baseline comparisons, and differentiators.
 
 ---
 
@@ -115,12 +116,12 @@ python src/evaluation/walk_forward.py --stock reliance_ns --timesteps 50000
 
 ## Key Experimental Results
 
-* **TCS Champion (V2 DQN Tuned)**: Out-of-sample (2021–2024), the tuned DQN model achieved the **highest performance in the entire project** on TCS, yielding **+78.04% cumulative return** and a **0.5914 Sharpe ratio** with a maximum drawdown of only **-15.67%** (compared to Buy & Hold's +51.27% return and -24.98% drawdown).
-* **HDFC Bank Sortino Stabilization**: Incorporating the downside-deviation Sortino reward (`diff_sortino`) under DQN yielded **+37.69% cumulative return** (0.2090 Sharpe), outperforming standard PPO's +14.71% and proving downside risk penalties prevent whipsawing and transaction fee drag.
-* **Infosys Policy Rescue**: Tuned DQN under `portfolio_return` generated a positive **+31.62% cumulative return** (0.1519 Sharpe) on INFY, successfully stabilizing and rescuing the agent from PPO's catastrophic high-frequency trading collapse (-41.53% return).
-* **Reliance Default Champion**: The default/untuned DQN model remains the champion configuration for Reliance, yielding **+47.12% return** and cutting drawdown to **-16.64%** (Sharpe: 0.31). 
-* **ARIMA & LSTM Forecasting Baselines**: Out-of-sample (2021–2024), ARIMA(1,0,1) generated positive returns (+28% to +35%) but suffered from high drawdowns. LSTM regressors collapsed under noise (yielding near 0% return and high trade counts), demonstrating that learning a direct policy under transaction costs is far superior to standard forecasting.
-* **Friction Penalty**: High-frequency trading without a robust strategy (e.g., `Random`) loses up to 80% of capital due to the compounding impact of 0.1% transaction fees and 0.05% price slippage.
-* **RL Agent Convergence**: In daily trading environments, agents naturally converge toward a low-frequency policy to avoid paying trading costs, demonstrating that incorporating transaction costs is vital to prevent over-trading.
+* **INFY Continuous SAC Champion**: Under the `portfolio_return` reward and State 7 (Market Context) feature group, the continuous SAC agent achieved a **+108.27% cumulative return** (Sharpe: **0.7676**), outperforming the Buy & Hold baseline (**+64.56%**) by a wide margin.
+* **INFY TD3 Volatility Regularization**: In the continuous action space under `diff_sortino` and State 7, the TD3 agent achieved a **+51.42% return** with a maximum drawdown of only **-10.68%** (compared to B&H's -35.56%) in just **19 trades**, avoiding transaction cost drag.
+* **TCS Champion (V2 DQN Tuned)**: Out-of-sample (2021–2024), the tuned DQN model achieved the highest performance on TCS under State 2, yielding **+78.04% cumulative return** and a **0.5914 Sharpe ratio** with a maximum drawdown of only **-15.67%** (compared to Buy & Hold's +51.27% return).
+* **HDFC Bank State 7 DQN Champion**: Moving the tuned DQN agent from State 2 to State 7 (Market Context) under `diff_sortino` boosted returns to **+51.73%** (Sharpe: **0.3423**, Max Drawdown: **-20.87%**).
+* **Reliance Default Champion**: The default/untuned DQN model remains the champion configuration for Reliance under State 2, yielding **+47.12% return** and cutting drawdown to **-16.64%** (Sharpe: 0.31). 
+* **ARIMA & LSTM Forecasting Baselines**: Out-of-sample (2021–2024), ARIMA(1,0,1) generated positive returns (+28% to +35%) but suffered from high drawdowns. LSTM regressors collapsed under noise (yielding near 0% return and high trade counts), demonstrating that learning a direct policy under transaction costs is far superior to forecasting.
+* **30.7x Environment Speedup**: Caching DataFrame queries into flat NumPy arrays inside the step loop increased environment execution speed from 2,353 to **72,266 steps/second**, allowing parallelized hyperparameter optimization.
 
 
