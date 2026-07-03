@@ -1,8 +1,8 @@
 # Deep Reinforcement Learning for Stock Trading (Finsearch RL)
 
-A rigorous, research-grade quantitative trading framework that designs, trains, and evaluates Deep Reinforcement Learning (RL) agents on historical NIFTY 50 and constituent stock data.
+This is our project for building and training Deep Reinforcement Learning (RL) bots to trade NIFTY 50 constituent stocks (Reliance, TCS, HDFC Bank, and Infosys). 
 
-This project is built using a custom, Gymnasium-compatible portfolio environment, implements realistic market friction (transaction costs and price slippage), establishes heuristic baselines, and evaluates policy models using a time-series walk-forward validation framework.
+We built a custom Gymnasium-compatible trading environment that simulates daily trading with realistic transaction fees (0.1%) and price slippage (0.05%). We trained various RL models (DQN, PPO, SAC, TD3) and compared them against traditional baselines like Buy & Hold, ARIMA, and LSTMs using a rolling walk-forward backtest.
 
 ---
 
@@ -14,7 +14,7 @@ project/
     ppo_config.yaml          # PPO agent hyperparameters
   data/
     raw/                     # Downloaded raw CSV and Parquet files
-    processed/               # Stationarized and normalized feature datasets
+    processed/               # Feature datasets
   docs/
     Data_Collection.md       # Stage 2: Data collection and quality checks
     Feature_Engineering.md   # Stage 3: Feature design, formulas, and math
@@ -37,7 +37,8 @@ project/
       baseline_strategies.py # Heuristic strategy definitions
       run_baselines.py       # Baseline evaluation runner
     training/
-      train_agent.py         # PPO model training script
+      train_agent.py         # Agent training script
+      tune_dqn.py            # Optuna tuning script
     evaluation/
       backtester.py          # Deterministic backtesting engine
       run_eval.py            # Backtest evaluation runner
@@ -46,28 +47,28 @@ project/
       data_downloader.py     # Yahoo Finance historical downloader
   tests/
     test_trading_env.py      # Environment sanity/integration tests
-  requirements.txt           # Python dependency specifications
+  requirements.txt           # Python dependencies
 ```
 
 ---
 
-## Stage-by-Stage Documentation Index
+## Project Documentation
 
-To deeply understand each phase of the project, refer to the corresponding documentation files:
+If you want to read about the different parts of the project, check out these files:
 
-1. **[Data Collection](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Data_Collection.md)**: Design of the yfinance downloading pipeline and data cleaning/validation logic.
-2. **[Feature Engineering](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Feature_Engineering.md)**: Mathematical definitions, financial intuition, and lookahead-bias prevention of the 16 technical and market indicators.
-3. **[Environment Design](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Environment.md)**: Gymnasium implementation, action space, state representation, and execution of transaction fees and price slippage.
-4. **[Heuristic Baselines](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Baselines.md)**: Definitions and comparative analysis of Buy & Hold, Random, EMA Crossover, and RSI strategies.
-5. **[Agent Training & Hyperparameters](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Training.md)**: PPO actor-critic details, custom callbacks, and resolving neural network overflow using dimensionless scaling.
-6. **[Evaluation & Backtesting](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Evaluation.md)**: Deterministic evaluation rollout, trade log plotting, and underwater drawdown tracking.
-7. **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Rolling out-of-sample time-series cross-validation design, performance results, and empirical research insights.
-8. **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: Rolling walk-forward validation design, mathematical formulations, and out-of-sample results of ARIMA and LSTM baselines.
-9. **[Quant-RL Equities Trading Report](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Competition_Winning_Report.md)**: Detailed report detailing progressive state formulations, downside risk engineering, baseline comparisons, and differentiators.
+* **[Data Collection](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Data_Collection.md)**: How we downloaded historical data from yfinance and cleaned it.
+* **[Feature Engineering](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Feature_Engineering.md)**: The technical indicators we calculated and how we normalized them.
+* **[Environment Design](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Environment.md)**: How our custom Gymnasium trading environment handles cash, shares, and transaction fees.
+* **[Heuristic Baselines](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Baselines.md)**: Testing simple rules like Buy & Hold, EMA Crossover, and RSI.
+* **[Agent Training & Parameters](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Training.md)**: Details on training PPO, DQN, SAC, and TD3.
+* **[Evaluation & Backtesting](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Evaluation.md)**: How we backtest our trained models.
+* **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Results from walk-forward testing.
+* **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: How statistical and deep learning forecasting models performed.
+* **[Final Project Report](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Competition_Winning_Report.md)**: Our final submission report summarizing the progressive features, reward scaling, results, and differentiators.
 
 ---
 
-## Quick Start & Reproduction
+## How to Run the Code
 
 ### 1. Environment Setup
 Activate your conda environment and install dependencies:
@@ -77,7 +78,7 @@ pip install -r requirements.txt
 ```
 
 ### 2. Download Raw Data
-Download historical daily stock data for the NIFTY 50 index (`^NSEI`) and constituent stocks (`RELIANCE.NS`, `TCS.NS`, `HDFCBANK.NS`, `INFY.NS`) from 2015 to 2025:
+Download historical daily stock data for the NIFTY 50 index (`^NSEI`) and constituent stocks (`RELIANCE.NS`, `TCS.NS`, `HDFCBANK.NS`, `INFY.NS`):
 ```bash
 python src/utils/data_downloader.py --tickers ^NSEI RELIANCE.NS TCS.NS HDFCBANK.NS INFY.NS --start 2015-01-01 --end 2025-12-31
 ```
@@ -94,8 +95,8 @@ Simulate rule-based strategies inside the trading environment to establish bench
 python src/baselines/run_baselines.py
 ```
 
-### 5. Train PPO Agent
-Train the reinforcement learning agent on a stock (e.g. `reliance_ns`) using the configured hyperparameters:
+### 5. Train RL Agent
+Train the reinforcement learning agent on a stock (e.g. `reliance_ns`):
 ```bash
 python src/training/train_agent.py --stock reliance_ns --timesteps 100000 --reward portfolio_return
 ```
@@ -114,14 +115,13 @@ python src/evaluation/walk_forward.py --stock reliance_ns --timesteps 50000
 
 ---
 
-## Key Experimental Results
+## What We Found (Results Summary)
 
-* **INFY Continuous SAC Champion**: Under the `portfolio_return` reward and State 7 (Market Context) feature group, the continuous SAC agent achieved a **+108.27% cumulative return** (Sharpe: **0.7676**), outperforming the Buy & Hold baseline (**+64.56%**) by a wide margin.
-* **INFY TD3 Volatility Regularization**: In the continuous action space under `diff_sortino` and State 7, the TD3 agent achieved a **+51.42% return** with a maximum drawdown of only **-10.68%** (compared to B&H's -35.56%) in just **19 trades**, avoiding transaction cost drag.
-* **TCS Champion (V2 DQN Tuned)**: Out-of-sample (2021–2024), the tuned DQN model achieved the highest performance on TCS under State 2, yielding **+78.04% cumulative return** and a **0.5914 Sharpe ratio** with a maximum drawdown of only **-15.67%** (compared to Buy & Hold's +51.27% return).
-* **HDFC Bank State 7 DQN Champion**: Moving the tuned DQN agent from State 2 to State 7 (Market Context) under `diff_sortino` boosted returns to **+51.73%** (Sharpe: **0.3423**, Max Drawdown: **-20.87%**).
-* **Reliance Default Champion**: The default/untuned DQN model remains the champion configuration for Reliance under State 2, yielding **+47.12% return** and cutting drawdown to **-16.64%** (Sharpe: 0.31). 
-* **ARIMA & LSTM Forecasting Baselines**: Out-of-sample (2021–2024), ARIMA(1,0,1) generated positive returns (+28% to +35%) but suffered from high drawdowns. LSTM regressors collapsed under noise (yielding near 0% return and high trade counts), demonstrating that learning a direct policy under transaction costs is far superior to forecasting.
-* **30.7x Environment Speedup**: Caching DataFrame queries into flat NumPy arrays inside the step loop increased environment execution speed from 2,353 to **72,266 steps/second**, allowing parallelized hyperparameter optimization.
+Here is a summary of our main findings after running rolling backtests from 2021 to 2024:
 
-
+* **Continuous SAC worked best for Infosys (INFY)**: Our continuous SAC agent achieved a **+108.27% cumulative return** (Sharpe: **0.7676**) using market context features (State 7), easily beating the Buy & Hold benchmark (**+64.56%**).
+* **TD3 kept trading costs low**: In the continuous action space, standard SAC traded way too much (over 800 micro-trades) and lost a lot of profit to transaction fees. By using TD3 with deterministic policy smoothing and our downside-deviation Sortino reward, we cut trades to just **19 high-conviction trades** on INFY, yielding **+51.42% return** with a very low drawdown of **-10.68%** (Buy & Hold drawdown was -35.56%).
+* **Tuned DQN crushed TCS**: Our tuned DQN agent (optimized with Optuna) achieved the highest return on TCS (**+78.04% return**, Sharpe **0.5914**) using trend indicators (State 2), beating Buy & Hold (**+51.27%**).
+* **Adding Market Context helped HDFC Bank**: Moving DQN to State 7 (incorporating rolling Beta and index correlation relative to NIFTY 50) under the downside-only Sortino reward boosted HDFCBANK's return from +37.69% to **+51.73%** (Sharpe: **0.3423**).
+* **Forecasting models (ARIMA/LSTM) struggled**: While ARIMA(1,0,1) made some profit, it had high drawdowns. LSTM price forecasting models completely collapsed under noise (near 0% return with high trade counts), showing that predicting price changes directly is much harder than using RL to learn a direct buy/sell policy under trading fees.
+* **We optimized the simulator by 30x**: Initially, the environment was very slow because of pandas `.iloc` and `.loc` lookups inside the step loop. By pre-caching the dataframe into flat NumPy arrays, we boosted speed from 2,353 steps/sec to **72,266 steps/second** (a **30.7x speedup**), which allowed us to run parallel Optuna hyperparameter sweeps in minutes.
