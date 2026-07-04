@@ -6,6 +6,8 @@ data/processed/
 models/
 logs/
 *.zip
+*.pt
+pendulum_dqn/results/train_log.txt
 
 # Database files
 *.db

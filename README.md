@@ -4,6 +4,8 @@ This is our project for building and training Deep Reinforcement Learning (RL) b
 
 We built a custom Gymnasium-compatible trading environment that simulates daily trading with realistic transaction fees (0.1%) and price slippage (0.05%). We trained various RL models (DQN, PPO, SAC, TD3) and compared them against traditional baselines like Buy & Hold, ARIMA, and LSTMs using a rolling walk-forward backtest.
 
+Before the trading work, we also did a smaller warm-up exercise: solving the classic **Inverted Pendulum** control problem with a Deep Q-Network built from scratch. See [`pendulum_dqn/`](pendulum_dqn/) and the write-up in [docs/Pendulum_DQN.md](docs/Pendulum_DQN.md).
+
 ---
 
 ## Repository Structure
@@ -47,6 +49,12 @@ project/
       data_downloader.py     # Yahoo Finance historical downloader
   tests/
     test_trading_env.py      # Environment sanity/integration tests
+  pendulum_dqn/              # Warm-up: DQN on Inverted Pendulum (from scratch)
+    discretize_wrapper.py    # Discretizes the continuous torque into 11 actions
+    replay_buffer.py         # Cyclical experience replay memory
+    q_network.py             # MLP Q-network (3 -> 128 -> 128 -> 11)
+    agent.py                 # DQN agent (epsilon-greedy, target network, learning)
+    train.py                 # Training loop, model save, learning-curve plot
   requirements.txt           # Python dependencies
 ```
 
@@ -65,6 +73,7 @@ If you want to read about the different parts of the project, check out these fi
 * **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Results from walk-forward testing.
 * **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: How statistical and deep learning forecasting models performed.
 * **[Final Project Report](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Competition_Winning_Report.md)**: Our final submission report summarizing the progressive features, reward scaling, results, and differentiators.
+* **[Pendulum DQN Warm-Up](docs/Pendulum_DQN.md)**: Our pre-project practice problem — solving the Inverted Pendulum with a from-scratch DQN using action-space discretization.
 
 ---
 
