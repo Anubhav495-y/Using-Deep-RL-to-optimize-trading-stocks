@@ -73,7 +73,11 @@ If you want to read about the different parts of the project, check out these fi
 * **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Results from walk-forward testing.
 * **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: How statistical and deep learning forecasting models performed.
 * **[Final Project Report](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Competition_Winning_Report.md)**: Our final submission report summarizing the progressive features, reward scaling, results, and differentiators.
-* **[Pendulum DQN Warm-Up](docs/Pendulum_DQN.md)**: Our pre-project practice problem — solving the Inverted Pendulum with a from-scratch DQN using action-space discretization.
+    * **[Pendulum DQN Warm-Up](docs/Pendulum_DQN.md)**: Our pre-project practice problem — solving the Inverted   
+  Pendulum with a from-scratch DQN using action-space discretization.
+    * **[ML Perspective Guide](docs/ML_Perspective_Guide.md)**: An end-to-end guide to the project explained      
+  purely through machine learning and reinforcement learning concepts.
+  
 
 ---
 
