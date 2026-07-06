@@ -4,8 +4,6 @@ This is our project for building and training Deep Reinforcement Learning (RL) b
 
 We built a custom Gymnasium-compatible trading environment that simulates daily trading with realistic transaction fees (0.1%) and price slippage (0.05%). We trained various RL models (DQN, PPO, SAC, TD3) and compared them against traditional baselines like Buy & Hold, ARIMA, and LSTMs using a rolling walk-forward backtest.
 
-Before the trading work, we also did a smaller warm-up exercise: solving the classic **Inverted Pendulum** control problem with a Deep Q-Network built from scratch. See [`pendulum_dqn/`](pendulum_dqn/) and the write-up in [docs/Pendulum_DQN.md](docs/Pendulum_DQN.md).
-
 ---
 
 ## Repository Structure
@@ -49,12 +47,6 @@ project/
       data_downloader.py     # Yahoo Finance historical downloader
   tests/
     test_trading_env.py      # Environment sanity/integration tests
-  pendulum_dqn/              # Warm-up: DQN on Inverted Pendulum (from scratch)
-    discretize_wrapper.py    # Discretizes the continuous torque into 11 actions
-    replay_buffer.py         # Cyclical experience replay memory
-    q_network.py             # MLP Q-network (3 -> 128 -> 128 -> 11)
-    agent.py                 # DQN agent (epsilon-greedy, target network, learning)
-    train.py                 # Training loop, model save, learning-curve plot
   requirements.txt           # Python dependencies
 ```
 
@@ -73,11 +65,7 @@ If you want to read about the different parts of the project, check out these fi
 * **[Walk-Forward Experiments](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Experiments.md)**: Results from walk-forward testing.
 * **[ARIMA & LSTM Benchmarks](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Benchmarks_ARIMA_LSTM.md)**: How statistical and deep learning forecasting models performed.
 * **[Final Project Report](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/Competition_Winning_Report.md)**: Our final submission report summarizing the progressive features, reward scaling, results, and differentiators.
-    * **[Pendulum DQN Warm-Up](docs/Pendulum_DQN.md)**: Our pre-project practice problem — solving the Inverted   
-  Pendulum with a from-scratch DQN using action-space discretization.
-    * **[ML Perspective Guide](docs/ML_Perspective_Guide.md)**: An end-to-end guide to the project explained      
-  purely through machine learning and reinforcement learning concepts.
-  
+* **[ML Perspective Guide](file:///mnt/c/Users/Saket/Desktop/Projects/Finsearch_RL/docs/ML_Perspective_Guide.md)**: An end-to-end guide to the project explained purely through machine learning and reinforcement learning concepts.
 
 ---
 
@@ -138,3 +126,9 @@ Here is a summary of our main findings after running rolling backtests from 2021
 * **Adding Market Context helped HDFC Bank**: Moving DQN to State 7 (incorporating rolling Beta and index correlation relative to NIFTY 50) under the downside-only Sortino reward boosted HDFCBANK's return from +37.69% to **+51.73%** (Sharpe: **0.3423**).
 * **Forecasting models (ARIMA/LSTM) struggled**: While ARIMA(1,0,1) made some profit, it had high drawdowns. LSTM price forecasting models completely collapsed under noise (near 0% return with high trade counts), showing that predicting price changes directly is much harder than using RL to learn a direct buy/sell policy under trading fees.
 * **We optimized the simulator by 30x**: Initially, the environment was very slow because of pandas `.iloc` and `.loc` lookups inside the step loop. By pre-caching the dataframe into flat NumPy arrays, we boosted speed from 2,353 steps/sec to **72,266 steps/second** (a **30.7x speedup**), which allowed us to run parallel Optuna hyperparameter sweeps in minutes.
+
+---
+
+## Warm-Up: Inverted Pendulum with DQN
+
+As a practice problem before the main trading work, we also solved the classic **Inverted Pendulum** control task using a Deep Q-Network built from scratch. The code is in [`pendulum_dqn/`](pendulum_dqn/), with a short write-up in [docs/Pendulum_DQN.md](docs/Pendulum_DQN.md).
