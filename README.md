@@ -5,6 +5,9 @@ This is our project for building and training Deep Reinforcement Learning (RL) b
 We built a custom Gymnasium-compatible trading environment that simulates daily trading with realistic transaction fees (0.1%) and price slippage (0.05%). We trained various RL models (DQN, PPO, SAC, TD3) and compared them against traditional baselines like Buy & Hold, ARIMA, and LSTMs using a rolling walk-forward backtest.
 
 ---
+## Inverted Pendulum with DQN
+
+As a practice problem before the main trading work, we also solved the classic **Inverted Pendulum** control task using a Deep Q-Network built from scratch. The code is in [`pendulum_dqn/`](pendulum_dqn/), with a short write-up in [docs/Pendulum_DQN.md](docs/Pendulum_DQN.md).
 
 ## Repository Structure
 
@@ -129,6 +132,4 @@ Here is a summary of our main findings after running rolling backtests from 2021
 
 ---
 
-## Warm-Up: Inverted Pendulum with DQN
 
-As a practice problem before the main trading work, we also solved the classic **Inverted Pendulum** control task using a Deep Q-Network built from scratch. The code is in [`pendulum_dqn/`](pendulum_dqn/), with a short write-up in [docs/Pendulum_DQN.md](docs/Pendulum_DQN.md).
